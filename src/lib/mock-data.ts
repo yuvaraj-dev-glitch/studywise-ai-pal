@@ -123,14 +123,14 @@ export function buildGeneratedQuestions(opts: {
       `Design a ${opts.topic}-based solution for a 1 kW application. Justify device selection and estimate efficiency.`,
     ],
   };
-  const pool = stems[opts.type] ?? stems.short;
+  const pool: string[] = stems[opts.type] ?? stems['short'] ?? [];
   return Array.from({ length: opts.count }, (_, i) => ({
     id: `gen-${i}`,
     subject: opts.subject,
     topic: opts.topic,
     question_type: opts.type as Question["question_type"],
     difficulty: opts.difficulty as Question["difficulty"],
-    question_text: pool[i % pool.length],
+    question_text: pool[i % pool.length] ?? "",
     options:
       opts.type === "mcq"
         ? ["Option A — placeholder", "Option B — placeholder", "Option C — placeholder", "Option D — placeholder"]
