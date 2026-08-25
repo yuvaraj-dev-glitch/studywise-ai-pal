@@ -82,41 +82,152 @@ export type Database = {
         }
         Relationships: []
       }
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string | null
+          embedding: string | null
+          id: string
+          page_number: number | null
+          paper_id: string | null
+          source_kind: string
+          source_label: string
+          subject_id: string | null
+          token_estimate: number
+          topic_id: string | null
+          unit_id: string | null
+          user_id: string
+        }
+        Insert: {
+          chunk_index?: number
+          content: string
+          created_at?: string
+          document_id?: string | null
+          embedding?: string | null
+          id?: string
+          page_number?: number | null
+          paper_id?: string | null
+          source_kind?: string
+          source_label?: string
+          subject_id?: string | null
+          token_estimate?: number
+          topic_id?: string | null
+          unit_id?: string | null
+          user_id: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string | null
+          embedding?: string | null
+          id?: string
+          page_number?: number | null
+          paper_id?: string | null
+          source_kind?: string
+          source_label?: string
+          subject_id?: string | null
+          token_estimate?: number
+          topic_id?: string | null
+          unit_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_chunks_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "question_papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_chunks_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_chunks_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_chunks_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
+          chunk_count: number
           created_at: string
           doc_type: string
+          error_message: string | null
+          extracted_text: string | null
           filename: string
           id: string
+          mime_type: string | null
           page_count: number | null
+          processed_at: string | null
           size_bytes: number | null
           status: string
           storage_path: string | null
           subject_id: string | null
+          topic_id: string | null
+          unit_id: string | null
           user_id: string
         }
         Insert: {
+          chunk_count?: number
           created_at?: string
           doc_type?: string
+          error_message?: string | null
+          extracted_text?: string | null
           filename: string
           id?: string
+          mime_type?: string | null
           page_count?: number | null
+          processed_at?: string | null
           size_bytes?: number | null
           status?: string
           storage_path?: string | null
           subject_id?: string | null
+          topic_id?: string | null
+          unit_id?: string | null
           user_id: string
         }
         Update: {
+          chunk_count?: number
           created_at?: string
           doc_type?: string
+          error_message?: string | null
+          extracted_text?: string | null
           filename?: string
           id?: string
+          mime_type?: string | null
           page_count?: number | null
+          processed_at?: string | null
           size_bytes?: number | null
           status?: string
           storage_path?: string | null
           subject_id?: string | null
+          topic_id?: string | null
+          unit_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -125,6 +236,20 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -218,10 +343,18 @@ export type Database = {
       question_papers: {
         Row: {
           academic_year: string | null
+          chunk_count: number
           created_at: string
+          error_message: string | null
           exam_name: string | null
+          extracted_text: string | null
+          filename: string | null
           id: string
+          mime_type: string | null
+          page_count: number
+          paper_type: string
           semester: string | null
+          size_bytes: number | null
           status: string
           storage_path: string | null
           subject_id: string | null
@@ -230,10 +363,18 @@ export type Database = {
         }
         Insert: {
           academic_year?: string | null
+          chunk_count?: number
           created_at?: string
+          error_message?: string | null
           exam_name?: string | null
+          extracted_text?: string | null
+          filename?: string | null
           id?: string
+          mime_type?: string | null
+          page_count?: number
+          paper_type?: string
           semester?: string | null
+          size_bytes?: number | null
           status?: string
           storage_path?: string | null
           subject_id?: string | null
@@ -242,10 +383,18 @@ export type Database = {
         }
         Update: {
           academic_year?: string | null
+          chunk_count?: number
           created_at?: string
+          error_message?: string | null
           exam_name?: string | null
+          extracted_text?: string | null
+          filename?: string | null
           id?: string
+          mime_type?: string | null
+          page_count?: number
+          paper_type?: string
           semester?: string | null
+          size_bytes?: number | null
           status?: string
           storage_path?: string | null
           subject_id?: string | null
@@ -647,7 +796,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_document_chunks: {
+        Args: {
+          match_count?: number
+          p_subject_id?: string
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          page_number: number
+          paper_id: string
+          similarity: number
+          source_kind: string
+          source_label: string
+          subject_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
