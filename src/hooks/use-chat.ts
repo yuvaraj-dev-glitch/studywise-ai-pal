@@ -35,14 +35,17 @@ export function useChatMessages(sessionId: string | null) {
         .eq("session_id", sessionId!)
         .order("created_at");
       if (error) throw error;
-      return (data ?? []).map((m) => ({
-        id: m.id,
-        role: m.role as "user" | "assistant",
-        content: m.content,
-        created_at: m.created_at,
-        confidence: m.confidence ?? undefined,
-        sources: (m.sources as string[] | null) ?? undefined,
-      }));
+      return (data ?? []).map((m): ChatMessage => {
+        const base: ChatMessage = {
+          id: m.id,
+          role: m.role as "user" | "assistant",
+          content: m.content,
+          created_at: m.created_at,
+        };
+        if (typeof m.confidence === "number") base.confidence = m.confidence;
+        if (Array.isArray(m.sources)) base.sources = m.sources as string[];
+        return base;
+      });
     },
   });
 }
