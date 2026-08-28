@@ -69,6 +69,27 @@ function AuthPage() {
     navigate({ to: "/dashboard" });
   }
 
+  async function signInWithGoogle() {
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    setBusy(false);
+
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+
+    if (result.redirected) {
+      // Browser is redirecting to Google; stop here.
+      return;
+    }
+
+    // Tokens received and session set in the editor preview.
+    navigate({ to: "/dashboard" });
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-4 py-10">
       <div className="w-full max-w-md">
@@ -83,7 +104,23 @@ function AuthPage() {
             <CardTitle className="font-display">Welcome</CardTitle>
             <CardDescription>Sign in to continue your study plan.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={signInWithGoogle}
+              disabled={busy}
+            >
+              <Chrome className="mr-2 size-4" />
+              Continue with Google
+            </Button>
+
+            <div className="flex items-center gap-3">
+              <Separator className="flex-1" />
+              <span className="text-muted-foreground text-xs">or</span>
+              <Separator className="flex-1" />
+            </div>
+
             <Tabs defaultValue="signin">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign in</TabsTrigger>
