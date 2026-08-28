@@ -58,7 +58,7 @@ export const askTutor = createServerFn({ method: "POST" })
     const { data: matches } = await supabase.rpc("match_document_chunks", {
       query_embedding: JSON.stringify(vectors[0] ?? []) as unknown as string,
       match_count: 8,
-      p_subject_id: data.subjectId ?? undefined,
+      ...(data.subjectId ? { p_subject_id: data.subjectId } : {}),
     });
 
     const chunks = (matches ?? []) as {
