@@ -60,7 +60,10 @@ function PapersPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return toast.error("Choose a paper file");
+    if (!file) {
+      toast.error("Choose a paper file");
+      return;
+    }
     try {
       const id = await upload.mutateAsync({
         file,

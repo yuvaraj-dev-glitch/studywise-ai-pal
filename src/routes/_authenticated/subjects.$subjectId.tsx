@@ -45,7 +45,7 @@ function SubjectDetail() {
 
       <PageHeader
         title={subject?.name ?? "Subject"}
-        description={subject?.description ?? subject?.code ?? undefined}
+        description={subject?.description ?? subject?.code ?? ""}
         action={
           <Button asChild>
             <Link to="/tutor">Ask the tutor</Link>

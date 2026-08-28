@@ -75,7 +75,10 @@ function NotesPage() {
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return toast.error("Choose a file first");
+    if (!file) {
+      toast.error("Choose a file first");
+      return;
+    }
     try {
       const id = await upload.mutateAsync({
         file,
