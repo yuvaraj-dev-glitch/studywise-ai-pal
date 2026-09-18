@@ -28,7 +28,8 @@ async function gatewayFetch(path: string, body: unknown): Promise<Response> {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${apiKey()}`,
+      "Lovable-API-Key": apiKey(),
+      "X-Lovable-AIG-SDK": "fetch",
     },
     body: JSON.stringify(body),
   });
