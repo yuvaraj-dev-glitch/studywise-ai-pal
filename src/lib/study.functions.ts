@@ -34,11 +34,12 @@ async function retrieveContext(
 ) {
   const provider = getAIProvider();
   const { vectors } = await provider.embed([query]);
-  const { data } = await supabase.rpc("match_document_chunks", {
+    const args = {
     query_embedding: JSON.stringify(vectors[0] ?? []),
     match_count: count,
-    p_subject_id: subjectId ?? undefined,
-  });
+      ...(subjectId ? { p_subject_id: subjectId } : {}),
+    };
+    const { data } = await supabase.rpc("match_document_chunks", args);
   return (data ?? []) as {
     source_label: string;
     page_number: number | null;

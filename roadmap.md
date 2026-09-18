@@ -1,0 +1,4 @@
+- [x] Add secure Hugging Face completion provider and use it for tutor and study features
+- [x] Preserve grounded retrieval while allowing general-knowledge answers outside uploaded material
+- [x] Fix shared AI input handling and provider error messages across generation, mistakes, and planning
+- [ ] Verify the preview and authenticated tutor flow

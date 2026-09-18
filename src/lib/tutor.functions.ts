@@ -80,7 +80,7 @@ export const askTutor = createServerFn({ method: "POST" })
         },
       ],
       temperature: data.mode === "exam" ? 0.3 : 0.6,
-      maxOutputTokens: 1400,
+       maxOutputTokens: 1400,
     });
 
     const sources = [

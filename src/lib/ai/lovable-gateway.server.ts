@@ -13,7 +13,7 @@ import {
  */
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
-const CHAT_MODEL = "google/gemini-3-flash";
+const CHAT_MODEL = "openai/gpt-6-astra";
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
 const EMBED_BATCH = 64;
 
@@ -28,7 +28,8 @@ async function gatewayFetch(path: string, body: unknown): Promise<Response> {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${apiKey()}`,
+      "Lovable-API-Key": apiKey(),
+      "X-Lovable-AIG-SDK": "fetch",
     },
     body: JSON.stringify(body),
   });
@@ -79,16 +80,37 @@ export const lovableGatewayProvider: AIProvider = {
 
   async complete(request: CompletionRequest): Promise<CompletionResult> {
     const model = request.model ?? CHAT_MODEL;
-    const res = await gatewayFetch("/chat/completions", {
+    const res = await gatewayFetch("/responses", {
       model,
-      messages: request.messages,
-      ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
-      ...(request.maxOutputTokens !== undefined ? { max_tokens: request.maxOutputTokens } : {}),
+      input: request.messages,
+      stream: true,
+      reasoning: { effort: "low", summary: "auto" },
+      ...(request.maxOutputTokens !== undefined ? { max_output_tokens: request.maxOutputTokens } : {}),
     });
-    const json = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const text = json.choices?.[0]?.message?.content ?? "";
+    if (!res.body) return { text: "", model, provider: "lovable-gateway" };
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let text = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop() ?? "";
+      for (const event of events) {
+        const line = event.split("\n").find((part) => part.startsWith("data:"));
+        if (!line) continue;
+        const data = line.slice(5).trim();
+        if (data === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(data) as { type?: string; delta?: string };
+          if (parsed.type === "response.output_text.delta") text += parsed.delta ?? "";
+        } catch {
+          // Ignore incomplete SSE events.
+        }
+      }
+    }
     return { text, model, provider: "lovable-gateway" };
   },
 };

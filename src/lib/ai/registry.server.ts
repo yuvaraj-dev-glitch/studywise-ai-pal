@@ -1,4 +1,5 @@
 import { lovableGatewayProvider } from "./lovable-gateway.server";
+import { huggingFaceProvider } from "./huggingface.server";
 import { AIProviderError, type AIProvider } from "./provider";
 
 /**
@@ -16,6 +17,7 @@ export function registerAIProvider(provider: AIProvider) {
 }
 
 registerAIProvider(lovableGatewayProvider);
+registerAIProvider(huggingFaceProvider);
 
 /**
  * Placeholder for future local inference. Kept registered so the UI/service
@@ -33,7 +35,8 @@ registerAIProvider({
 });
 
 export function getAIProvider(preferredId?: string): AIProvider {
-  const wanted = preferredId ?? process.env["AI_PROVIDER"] ?? "lovable-gateway";
+  const wanted =
+    preferredId ?? process.env["AI_PROVIDER"] ?? (process.env["HUGGINGFACE_API_KEY"] ? "huggingface" : "lovable-gateway");
   const provider = providers.get(wanted);
   if (provider?.isAvailable()) return provider;
   const fallback = [...providers.values()].find((p) => p.isAvailable());
