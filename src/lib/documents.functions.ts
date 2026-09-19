@@ -213,7 +213,9 @@ export const getMaterialPreview = createServerFn({ method: "POST" })
     const marker = /\[\[PAGE:(\d+)\]\]\n([\s\S]*?)(?=\n\n\[\[PAGE:\d+\]\]|$)/g;
     const pagesFromText: { pageNumber: number; text: string }[] = [];
     for (const match of record.extracted_text?.matchAll(marker) ?? []) {
-      pagesFromText.push({ pageNumber: Number(match[1]), text: match[2].trim() });
+      const pageNumber = Number(match[1]);
+      const text = match[2];
+      if (Number.isFinite(pageNumber) && text) pagesFromText.push({ pageNumber, text: text.trim() });
     }
 
     const grouped = new Map<number, string[]>();
